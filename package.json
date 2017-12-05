@@ -1,0 +1,22 @@
+{
+  "name": "node-ds",
+  "version": "0.1.0",
+  "description": "FRC Driverstation library for nodejs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openrep/node-ds.git"
+  },
+  "author": "ZQ Yeo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/openrep/node-ds/issues"
+  },
+  "homepage": "https://github.com/openrep/node-ds#readme",
+  "dependencies": {
+    "buffer-crc32": "^0.2.13"
+  }
+}
