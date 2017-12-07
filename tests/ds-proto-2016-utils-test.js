@@ -30,6 +30,25 @@ describe("DS 2016 Protocol Utils", () => {
         expect(result).to.equalBytes(expectedBuffer);
     });
 
+    it('parses a datetime buffer correctly', () => {
+        const expectedDate = new Date(2017, 11, 2, 3, 15, 42, 255);
+        const expectedResult = {
+            microseconds: expectedDate.getMilliseconds() * 1000,
+            seconds: expectedDate.getSeconds(),
+            minutes: expectedDate.getMinutes(),
+            hours: expectedDate.getHours(),
+            day: expectedDate.getDate(),
+            month: expectedDate.getMonth(),
+            year: expectedDate.getFullYear()
+        };
+        
+        const test = Buffer.from([0x00, 0x03, 0xE4, 0x18,
+                                            0x2A, 0x0F, 0x03, 0x02,
+                                            0x0B, 0x75]);
+        const result = ProtoUtils.parseDateBuffer(test);
+        expect(result).to.deep.equal(expectedResult);
+    })
+
     it('generates a joystick buffer correctly', () => {
         // 2 joysticks, 10 buttons, 2 hats, 4 axes
         const testJoysticks = [
@@ -80,5 +99,62 @@ describe("DS 2016 Protocol Utils", () => {
         // The axes values are... fuzzy
         expect(result.hats).to.deep.equal(expectedJoystick.hats);
         expect(result.buttons).to.deep.equal(expectedJoystick.buttons);
+    });
+
+    it('parses extended data correctly', () => {
+        const byteArray =[
+            // Joystick 1
+            0x0F, 0x0C, // Header
+            0x04, 0x00, 0xE6, 0x58, 0x7F, // Axes
+            0x0A, 0x03, 0x55, // Buttons
+            0x02, 0xFF, 0xFF, 0x00, 0xFF,
+            
+            // Joystick 2
+            0x0F, 0x0C, // Header
+            0x04, 0x7F, 0xC0, 0x00, 0x7F, // Axes
+            0x0A, 0x03, 0x50, // Buttons
+            0x02, 0x00, 0x64, 0x00, 0xFF,
+
+            // Date
+            0x0B, 0x0F,
+            0x00, 0x03, 0xE4, 0x18,
+            0x2A, 0x0F, 0x03, 0x02,
+            0x0B, 0x75
+        ];
+        const testBuffer = Buffer.from(byteArray);
+
+        const expectedJoysticksResult = [
+            {
+                axes: [0, -0.2, 0.7, 1],
+                hats: [-1, 255],
+                buttons: [true, false, true, false, true, false, true, false, true, true]
+            },
+            {
+                axes: [1, -0.5, 0, 1],
+                hats: [100, 255],
+                buttons: [false, false, false, false, true, false, true, false, true, true]
+            },
+        ];
+
+        const expectedDate = new Date(2017, 11, 2, 3, 15, 42, 255);
+        const expectedDateResult = {
+            microseconds: expectedDate.getMilliseconds() * 1000,
+            seconds: expectedDate.getSeconds(),
+            minutes: expectedDate.getMinutes(),
+            hours: expectedDate.getHours(),
+            day: expectedDate.getDate(),
+            month: expectedDate.getMonth(),
+            year: expectedDate.getFullYear()
+        };
+
+        const result = ProtoUtils.parseRobotPacketExtendedData(testBuffer);
+        expect(result.joysticks).to.be.an('array');
+        expect(result.joysticks.length).to.equal(expectedJoysticksResult.length);
+        expect(result.joysticks[0].hats).to.deep.equal(expectedJoysticksResult[0].hats);
+        expect(result.joysticks[0].buttons).to.deep.equal(expectedJoysticksResult[0].buttons);
+        expect(result.joysticks[1].hats).to.deep.equal(expectedJoysticksResult[1].hats);
+        expect(result.joysticks[1].buttons).to.deep.equal(expectedJoysticksResult[1].buttons);
+        expect(result.date).to.be.an('object');
+        expect(result.date).to.deep.equal(expectedDateResult);
     });
 })
