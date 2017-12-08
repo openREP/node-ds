@@ -3,6 +3,7 @@ const expect = chai.use(require('chai-bytes')).expect;
 const ProtoUtils = require('../lib/protocols/ds-2016/ds-protocol-2016-utils');
 
 describe("DS 2016 Protocol Utils", () => {
+    // General Tests
     it('encodes voltage correctly', () => {
         const inputVoltage = 12.5;
         const expectedUpper = 12;
@@ -20,13 +21,14 @@ describe("DS 2016 Protocol Utils", () => {
         expect(result).to.be.equal(expectedVoltage);
     });
 
+    // DateTime
     it('generates a datetime buffer correctly', () => {
         const testDate = new Date(2017, 11, 2, 3, 15, 42, 255);
 
         const expectedBuffer = Buffer.from([0x00, 0x03, 0xE4, 0x18,
                                             0x2A, 0x0F, 0x03, 0x02,
                                             0x0B, 0x75]);
-        const result = ProtoUtils.getDateTime(testDate);
+        const result = ProtoUtils.makeDateTimeBuffer(testDate);
         expect(result).to.equalBytes(expectedBuffer);
     });
 
@@ -45,7 +47,7 @@ describe("DS 2016 Protocol Utils", () => {
         const test = Buffer.from([0x00, 0x03, 0xE4, 0x18,
                                             0x2A, 0x0F, 0x03, 0x02,
                                             0x0B, 0x75]);
-        const result = ProtoUtils.parseDateBuffer(test);
+        const result = ProtoUtils.parseDateTimeBuffer(test);
         expect(result).to.deep.equal(expectedResult);
     })
 
@@ -77,7 +79,7 @@ describe("DS 2016 Protocol Utils", () => {
         ];
 
         const expectedBuffer = Buffer.from(byteArray);
-        const result = ProtoUtils.getJoystickData({joysticks: testJoysticks});
+        const result = ProtoUtils.makeJoystickDataBuffer(testJoysticks);
         expect(result).to.equalBytes(expectedBuffer);
     });
 
@@ -94,7 +96,7 @@ describe("DS 2016 Protocol Utils", () => {
             0x02, 0xFF, 0xFF, 0x00, 0xFF,
         ];
         const testBuffer = Buffer.from(testByteArray);
-        const result = ProtoUtils.parseJoystickData(testBuffer);
+        const result = ProtoUtils.parseJoystickDataBuffer(testBuffer);
 
         // The axes values are... fuzzy
         expect(result.hats).to.deep.equal(expectedJoystick.hats);
@@ -147,7 +149,7 @@ describe("DS 2016 Protocol Utils", () => {
             year: expectedDate.getFullYear()
         };
 
-        const result = ProtoUtils.parseRobotPacketExtendedData(testBuffer);
+        const result = ProtoUtils.parseRobotPacketExtendedDataBuffer(testBuffer);
         expect(result.joysticks).to.be.an('array');
         expect(result.joysticks.length).to.equal(expectedJoysticksResult.length);
         expect(result.joysticks[0].hats).to.deep.equal(expectedJoysticksResult[0].hats);
