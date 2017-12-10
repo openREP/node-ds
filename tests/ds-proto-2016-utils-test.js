@@ -1,6 +1,9 @@
 const chai = require('chai');
 const expect = chai.use(require('chai-bytes')).expect;
 const ProtoUtils = require('../lib/protocols/ds-2016/ds-protocol-2016-utils');
+const { DSControlMode,
+        DSAlliance,
+        DSPosition } = require('../lib/constants');
 
 describe("DS 2016 Protocol Utils", () => {
     // General Tests
@@ -158,5 +161,52 @@ describe("DS 2016 Protocol Utils", () => {
         expect(result.joysticks[1].buttons).to.deep.equal(expectedJoysticksResult[1].buttons);
         expect(result.date).to.be.an('object');
         expect(result.date).to.deep.equal(expectedDateResult);
+    });
+
+    it('generates a client to robot packet correctly', () => {
+        const packet = {
+            seq: 14,
+            controlMode: DSControlMode.AUTONOMOUS,
+            emergencyStopped: false,
+            robotEnabled: true,
+            fmsCommunications: false,
+            robotAlliance: DSAlliance.BLUE,
+            robotPosition: DSPosition.POSITION_2,
+            reboot: false,
+            restartCode: false,
+            joysticks: [
+                {
+                    axes: [1, 0, 0.5, 1],
+                    hats: [0],
+                    buttons: [true, true, false, true, true]
+                },
+                {
+                    axes: [0, 0, 0, 0],
+                    hats: [0],
+                    buttons: [false, true, false, true, true]
+                }
+            ]
+        };
+
+        const expected = Buffer.from([
+            0x00, 0x0e, // seq
+            0x01, // COMM
+            0x06, // Control
+            0x00, // Request
+            0x04, // Alliance,
+            // Joystick 1
+            0x0D, 0x0C,
+            0x04, 0x7f, 0x00, 0x3F, 0x7F, // axes
+            0x05, 0x00, 0x1B, // buttons
+            0x01, 0x00, 0x00, // hat
+            // Joystick 2
+            0x0D, 0x0C,
+            0x04, 0x00, 0x00, 0x00, 0x00,
+            0x05, 0x00, 0x1A,
+            0x01, 0x00, 0x00
+        ]);
+
+        const result = ProtoUtils.makeClientToRobotPacket(packet);
+        expect(result).to.equalBytes(expected);
     });
 })
