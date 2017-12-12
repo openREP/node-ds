@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/openrep/node-ds#readme",
   "dependencies": {
+    "blessed": "^0.1.81",
+    "blessed-contrib": "^4.8.5",
     "buffer-crc32": "^0.2.13",
     "moment": "^2.19.3",
     "moment-timezone": "^0.5.14"
