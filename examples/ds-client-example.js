@@ -112,17 +112,14 @@ screen.key(['escape', 'q', 'C-c'], (ch, key) => {
 
 screen.key(['o'], (ch, key) => {
     dsClient.controlMode = DSControlMode.TELEOPERATED;
-    logVuew.log('Control mode set to TELEOPERATED');
 });
 
 screen.key(['a'], (ch, key) => {
     dsClient.controlMode = DSControlMode.AUTONOMOUS;
-    logVuew.log('Control mode set to AUTONOMOUS');
 });
 
 screen.key(['t'], (ch, key) => {
     dsClient.controlMode = DSControlMode.TEST;
-    logVuew.log('Control mode set to TEST');
 });
 
 screen.key(['e', 'd'], (ch, key) => {
