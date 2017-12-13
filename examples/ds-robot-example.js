@@ -20,8 +20,8 @@ function updateJoystickAxes(sticks) {
     if (sticks.length > 0) {
         var stick = sticks[0];
         for (var i = 0; i < stick.axes.length; i++) {
-            stickData.titles.push(i);
-            stickData.data.push(stick.axes[i]);
+            stickData.titles.push("A" + i);
+            stickData.data.push((stick.axes[i] * 4) + 4);
         }
     }
     return stickData;
@@ -29,14 +29,20 @@ function updateJoystickAxes(sticks) {
 
 function updateControlMode() {
     if (dsRobotClient.robotCommunications) {
+        var mode;
         switch (dsRobotClient.controlMode) {
             case DSControlMode.AUTONOMOUS:
-                return 'Autonomous';
+                mode = 'Autonomous';
+                break;
             case DSControlMode.TELEOPERATED:
-                return 'Teleoperated';
+                mode = 'Teleoperated';
+                break;
             case DSControlMode.TEST:
-                return 'Test';
+                mode = 'Test';
+                break;
         }
+
+        return 'Control Mode: ' + mode;
     }
     else {
         return 'No Client Connection';
@@ -49,16 +55,17 @@ function updateEnabledState() {
 
 const controlModeView = grid.set(0, 0, 2, 5, blessed.box, { content: updateControlMode()});
 const enabledView = grid.set(0, 5, 2, 5, blessed.box, { content: updateEnabledState() });
-const joystickView = grid.set(2, 0, 8, 8, contrib.bar, {
+const joystickView = grid.set(2, 0, 6, 6, contrib.bar, {
     label: 'Joysticks',
     barWidth: 4,
     barSpacing: 6,
     xOffset: 2,
-    maxHeight: 9
+    maxHeight: 8
 });
+const logView = grid.set(8, 0, 4, 12, contrib.log, {label: 'Log', fg: 'green', selectedFg: 'green'});
 
 dsRobotClient.on('shouldReboot', () => {
-    console.log('Asked to reboot');
+    logView.log('Asked to reboot');
 });
 
 dsRobotClient.on('joysticksUpdated', (sticks) => {
@@ -69,6 +76,30 @@ dsRobotClient.on('joysticksUpdated', (sticks) => {
 dsRobotClient.on('stateChanged', (evt) => {
     controlModeView.setContent(updateControlMode());
     enabledView.setContent(updateEnabledState());
+
+    switch(evt.field) {
+        case 'controlMode': {
+            var mode;
+            switch(evt.value) {
+                case DSControlMode.AUTONOMOUS: {
+                    mode = 'AUTONOMOUS';
+                } break;
+                case DSControlMode.TELEOPERATED: {
+                    mode = 'TELEOPERATED';
+                } break;
+                case DSControlMode.TEST: {
+                    mode = 'TEST';
+                } break;
+            }
+            logView.log('Control Mode Changed to: ' + mode);
+        } break;
+        case 'robotEnabled': {
+            logView.log('Robot Enabled state changed to: ' + (evt.value ? 'ENABLED':'DISABLED'));
+        } break;
+        case 'robotCommunications': {
+            logView.log('Robot Communications Changed to: ' + (evt.value ? 'PRESENT':'NOT PRESENT'));
+        } break;
+    }
     screen.render();
 });
 
