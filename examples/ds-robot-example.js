@@ -55,7 +55,7 @@ function updateEnabledState() {
 
 const controlModeView = grid.set(0, 0, 2, 5, blessed.box, { content: updateControlMode()});
 const enabledView = grid.set(0, 5, 2, 5, blessed.box, { content: updateEnabledState() });
-const joystickView = grid.set(2, 0, 6, 6, contrib.bar, {
+const joystickView = grid.set(2, 0, 6, 8, contrib.bar, {
     label: 'Joysticks',
     barWidth: 4,
     barSpacing: 6,
