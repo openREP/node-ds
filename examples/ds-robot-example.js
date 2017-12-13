@@ -11,7 +11,6 @@ const screen = blessed.screen({smartCSR: true});
 const grid = new contrib.grid({rows: 12, cols: 12, screen: screen});
 var dsRobotClient = new DriverStationRobot(new DS2016Protocol());
 
-console.log('hi');
 function updateJoystickAxes(sticks) {
     var stickData = {
         titles: [],
@@ -25,7 +24,6 @@ function updateJoystickAxes(sticks) {
             stickData.data.push(stick.axes[i]);
         }
     }
-    console.log(stickData);
     return stickData;
 }
 
